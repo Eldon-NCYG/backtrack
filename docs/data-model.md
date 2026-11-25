@@ -14,13 +14,17 @@ Column-level docs live in the dbt `.yml` files. Run `make docs` to browse them w
 
 | Model | Grain | Status |
 |---|---|---|
-| `raw.plays_export` | One row per play in the export | Built |
-| `stg_plays` | One music play (podcasts excluded) | Built |
+| `raw.plays_api` | One row per play returned by the API | Week 2 |
+| `stg_plays` | One music play | Week 3 |
 | `int_sessions` | One play, with a session number (new session after a 30 min gap) | Week 4 |
 | `fct_plays` | One play | Week 4 |
 | `fct_sessions` | One listening session | Week 4 |
 | `dim_date` | One calendar day | Week 4 |
 | `mart_monthly_top` | One track per month, ranked | Week 4 |
+
+Phase 1 plays come from the API only, so `stg_plays` has a single source. The API doesn't return `ms_played` or `skipped`, so those columns, the stream flag and `fct_sessions.skips` wait for phase 2.
+
+Phase 2 adds `raw.plays_export` (one row per play in the export). `stg_plays` then unions the two sources, the export wins where they overlap, and podcasts are filtered out.
 
 ## Target star schema (end of phase 2)
 
@@ -79,6 +83,10 @@ erDiagram
 ```
 
 A track can have several artists, so artists join through `bridge_track_artist`. Counting plays per artist must go through the bridge carefully to avoid double counting.
+
+`ms_played`, `is_stream` and `skipped` exist only in the export, so they stay null for plays that only the API saw.
+
+`dim_artist.popularity` needs a rethink before phase 2: Spotify's development mode stopped returning it in 2026. See [data-sources.md](data-sources.md).
 
 ## Conventions
 

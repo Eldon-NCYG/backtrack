@@ -27,6 +27,25 @@ I'm building this to learn data engineering properly and to have a portfolio pro
 
 **Ask before:** adding a dependency, changing the project structure, touching CI, or doing anything that costs money or touches cloud resources.
 
+## Learning notes in Notion
+
+My private notes for this project live in Notion under `Personal Projects / Backtrack`, with one sub-page per phase (currently `Phase 1: API MVP`). Find the page by title through the Notion MCP server. Don't put Notion URLs in this repo.
+
+**When:** at the end of a step (a commit-sized piece of work, or a question that took real explaining), if it taught something worth keeping. Most small changes don't. Skip those rather than pad the page.
+
+**What is worth a note:**
+
+- **Concept:** an idea I met for the first time, written in terms of how this project uses it (not a textbook definition).
+- **Gotcha:** something that broke or surprised us, and what fixed it.
+- **Decision:** the choice and the why in a line or two, linking to the ADR rather than restating it.
+- **Story seed:** a hard problem worth a STAR interview story later. Label it `Story seed`.
+
+**How:** append a dated entry (`### YYYY-MM-DD: topic`, then a few bullets) to the current phase page. Append only: never rewrite or delete what's already there. Link to repo docs rather than copying them. Then add a `Noted in Notion:` line to the change summary saying what you added, so I can reword it in my own words.
+
+The privacy rules below apply in Notion too: no rows of real listening data and no credentials.
+
+If the Notion tools aren't connected in a session, put the note in the summary and say it wasn't saved. Don't write learning notes into the repo instead.
+
 ## Project context
 
 Read these before making changes:
@@ -35,15 +54,17 @@ Read these before making changes:
 - `docs/phases/`: the spec for each phase. **Current phase: 1 (local MVP).** Don't build phase 2+ features unless I ask.
 - `docs/architecture.md`: how the pieces fit.
 - `docs/data-model.md`: tables, grains and naming.
-- `docs/data-sources.md`: the Spotify export and API formats.
+- `docs/data-sources.md`: the Spotify API and export formats.
 - `docs/adr/`: decisions already made. Don't contradict one without saying so.
+
+**Phase 1 is API-first** ([ADR 0004](docs/adr/0004-api-first-mvp.md)): an hourly recently-played sync on my laptop. The export is a phase 2 backfill. The code in `ingestion/`, `transform/`, `tests/`, the `Makefile` and CI was written for the earlier export-first plan and is being rebuilt, so where code and docs disagree, the docs are the plan. Don't extend the export code in phase 1.
 
 ## Conventions
 
 - **Timestamps:** store in UTC. Convert to `Pacific/Auckland` in dbt staging only.
 - **`user_id` on every table**, even though there is one user today. Default is `1`.
 - **Provider-neutral names:** `stg_plays` with a `source` column, not `stg_spotify_plays`. Provider IDs (Spotify URI, ISRC) are columns, not table names.
-- **Loader contract:** every loader in `ingestion/` takes raw files in, writes one raw table out, is safe to re-run, and prints row count and date range.
+- **Loader contract:** every loader in `ingestion/` lands its extract in the raw zone as delivered (minus anything the privacy rules say to drop), writes one raw table, is safe to re-run, and prints row count and date range.
 - **dbt layers:** `staging` (rename, cast, filter; no joins), `intermediate` (reusable logic), `marts` (facts and dimensions the dashboard reads). Document the grain of every mart in its `.yml`.
 - **Tests:** every primary key gets `unique` and `not_null` in dbt. Python logic gets pytest.
 - **SQL style:** lowercase keywords, CTEs over subqueries, one column per line in selects.
@@ -52,15 +73,21 @@ Read these before making changes:
 ## Privacy rules
 
 - Never commit anything under `data/`, any `*.duckdb` file, or `.env`.
-- Never print, log or paste rows of my real listening data into docs, tests or commit messages. Use the fake data generator (`ingestion/fake_export.py`) for examples and tests.
+- Never print, log or paste rows of my real listening data into docs, tests or commit messages. Use the fake data generator in `ingestion/` for examples and tests.
+- Never print, log or commit Spotify credentials (client secret, access token, refresh token). They live in `.env` only.
+- The raw zone (`data/raw/`) is the only copy of plays the API has since forgotten. Never delete it, or run `make clean`, without asking.
 - The export's `ip_addr` field must be dropped at load time and never stored.
 
 ## Commands
 
+The phase 1 targets. `auth`, `sync` and the API version of `fake` and `load` arrive in weeks 1 and 2; until then the `Makefile` still has the export versions.
+
 ```bash
 make setup     # create the virtualenv, install Python deps and dbt packages
-make fake      # generate a fake export in data/export/ for local development
-make load      # load the export into the warehouse (safe to re-run)
+make auth      # one-off: authorise the Spotify app and get a refresh token
+make fake      # generate fake API responses for local development and CI (kept apart from real data)
+make sync      # pull new plays from the Spotify API into the raw zone (needs .env)
+make load      # load the raw zone into the warehouse (safe to re-run)
 make build     # dbt build: run and test every model
 make test      # pytest
 make lint      # ruff
@@ -75,5 +102,5 @@ transform/     dbt project: staging, intermediate, marts, tests
 dashboard/     Evidence site (phase 1, week 5)
 docs/          architecture, data model, phase specs, ADRs, runbooks, retros
 tests/         pytest
-data/          gitignored: real export and local raw zone
+data/          gitignored: local raw zone and warehouse (and the export in phase 2)
 ```
