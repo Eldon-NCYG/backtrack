@@ -1,0 +1,36 @@
+# Personal data: never commit
+data/
+*.duckdb
+*.duckdb.wal
+.env
+
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# dbt
+transform/target/
+transform/dbt_packages/
+transform/logs/
+logs/
+
+# Evidence / Node
+node_modules/
+dashboard/.evidence/
+dashboard/build/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# dbt anonymous usage id
+.user.yml

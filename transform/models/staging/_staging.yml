@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: stg_plays
+    description: >
+      One row per music play (podcasts excluded), all sources in one shape.
+      Grain: one play. Timestamps are UTC in played_at and NZ local time in played_at_nz.
+    columns:
+      - name: user_id
+        data_tests: [not_null]
+      - name: played_at
+        data_tests: [not_null]
+      - name: track_uri
+        data_tests: [not_null]
+      - name: ms_played
+        data_tests: [not_null]
+      - name: source
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["spotify_export"]

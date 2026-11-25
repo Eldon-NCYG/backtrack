@@ -1,0 +1,9 @@
+# Committed on purpose: it holds no secrets, only the warehouse path.
+# Phase 2 adds a MotherDuck target that reads MOTHERDUCK_TOKEN from the environment.
+backtrack:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DBT_WAREHOUSE', '../data/listening.duckdb') }}"
+      threads: 4
