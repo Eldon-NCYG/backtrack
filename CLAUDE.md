@@ -64,7 +64,7 @@ Read these before making changes:
 - **Timestamps:** store in UTC. Convert to `Pacific/Auckland` in dbt staging only.
 - **`user_id` on every table**, even though there is one user today. Default is `1`.
 - **Provider-neutral names:** `stg_plays` with a `source` column, not `stg_spotify_plays`. Provider IDs (Spotify URI, ISRC) are columns, not table names.
-- **Loader contract:** every loader in `ingestion/` lands its extract in the raw zone untouched, writes one raw table, is safe to re-run, and prints row count and date range.
+- **Loader contract:** every loader in `ingestion/` lands its extract in the raw zone as delivered (minus anything the privacy rules say to drop), writes one raw table, is safe to re-run, and prints row count and date range.
 - **dbt layers:** `staging` (rename, cast, filter; no joins), `intermediate` (reusable logic), `marts` (facts and dimensions the dashboard reads). Document the grain of every mart in its `.yml`.
 - **Tests:** every primary key gets `unique` and `not_null` in dbt. Python logic gets pytest.
 - **SQL style:** lowercase keywords, CTEs over subqueries, one column per line in selects.
@@ -85,7 +85,7 @@ The phase 1 targets. `auth`, `sync` and the API version of `fake` and `load` arr
 ```bash
 make setup     # create the virtualenv, install Python deps and dbt packages
 make auth      # one-off: authorise the Spotify app and get a refresh token
-make fake      # generate fake API responses in data/raw/ for local development and CI
+make fake      # generate fake API responses for local development and CI (kept apart from real data)
 make sync      # pull new plays from the Spotify API into the raw zone (needs .env)
 make load      # load the raw zone into the warehouse (safe to re-run)
 make build     # dbt build: run and test every model

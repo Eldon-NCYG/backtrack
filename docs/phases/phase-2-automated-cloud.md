@@ -12,7 +12,7 @@
 | 7 | Cloud | S3 raw zone created with Terraform. Warehouse on MotherDuck. |
 | 8 | Enrichment | Track metadata (including ISRC) for tracks that only appear in the export, MusicBrainz genres, hourly weather. `dim_artist` as a dbt snapshot. |
 | 9 | Orchestration | The hourly sync moves from launchd on my laptop to GitHub Actions schedules (hourly sync, nightly build), then Dagster with retries, backfills and failure alerts. |
-| 10 | Ship | Public dashboard, data health page, yearly totals reconciled against stats.fm with differences explained. |
+| 10 | Ship | Public dashboard, the data health page extended to cover the export and enrichment, yearly totals reconciled against stats.fm with differences explained. |
 
 ## Done when
 

@@ -62,12 +62,12 @@ Needs Python 3.11+ and `make`.
 
 ```bash
 make setup      # virtualenv + dependencies
-make fake       # no Spotify app yet? generate fake API responses in data/raw/
+make fake       # no Spotify app yet? generate fake API responses (kept apart from real data)
 make all        # load the raw zone, then build and test every dbt model
 make docs       # browse lineage and table docs in your browser
 ```
 
-To use your real data, create a Spotify developer app and authorise it once ([docs/runbooks/spotify-api-setup.md](docs/runbooks/spotify-api-setup.md)), then run `make sync` to pull your recent plays and `make all` to build. The API only returns the last 50 plays, so history builds up from the first sync; a launchd job runs the sync every hour. `data/` and `.env` are gitignored and nothing personal is committed.
+To use your real data, create a Spotify developer app and authorise it once ([docs/runbooks/spotify-api-setup.md](docs/runbooks/spotify-api-setup.md)), then run `make sync` to pull your recent plays and `make all` to build. The API only returns the last 50 plays, so history builds up from the first sync; a launchd job runs `make sync all` every hour. `data/` and `.env` are gitignored and nothing personal is committed.
 
 ## Roadmap
 
